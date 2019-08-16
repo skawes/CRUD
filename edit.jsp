@@ -11,5 +11,23 @@
 <h2 align="center"><a href="/add.jsp">Add new book</a>  &nbsp;
 <a href="/list">List all books</a></h2>
 <h3 align="center">Edit book</h3>
+<form action="/editbook">
+<table border="2 px solid black" align="center">
+<tr>
+<th>Id</th><td><input type="text"> </td>
+</tr>
+<tr>
+<th>New-Title</th><td><input type="text"> </td>
+</tr>
+<tr>
+<th>New-Author</th><td><input type="text">  </td>
+</tr>
+<tr>
+<th>New-Price</th><td><input type="text"> </td>
+</tr>
+</table>
+<br>
+<div align="center"><input " type="submit" value="update" ></div>
+</form>
 </body>
 </html>
