@@ -8,22 +8,31 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map.Entry;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class Test1 {
 	static ArrayList<String> visited = new ArrayList<String>();
+	static List<String> sheetList = new ArrayList<String>();
+	static HashMap<String, Object> baseMap = new HashMap<String, Object>();
+	static HashMap<String, List<Object[]>> map = new HashMap<String, List<Object[]>>();
 
 	public static void main(String[] args) throws ParserConfigurationException {
 		FileInputStream inputStream;
-		HashMap<String, List<Object[]>> map = new HashMap<String, List<Object[]>>();
-		List<String> sheetList = new ArrayList<String>();
+		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+		Document doc = docBuilder.newDocument();
 		sheetList.add("company");
 		sheetList.add("employee");
 		try {
@@ -34,7 +43,7 @@ public class Test1 {
 
 				map.put(workbook.getSheetName(i), getData(i, workbook));
 			}
-			HashMap<String, Object> baseMap = new HashMap<String, Object>();
+
 			Sheet sheet = workbook.getSheet("baseXML");
 			Iterator<Row> rowIterator = sheet.iterator();
 			rowIterator.next();
@@ -49,11 +58,12 @@ public class Test1 {
 
 					HashMap<String, Object> innerMap = (HashMap<String, Object>) baseMap.get("companies");
 					for (int i = 0; i < nodes.length; i++) {
+						if (i > 0) {
+							while (innerMap.containsKey(nodes[i - 1])) {
+								// System.out.println("hi");
+								innerMap = (HashMap<String, Object>) innerMap.get(nodes[i - 1]);
 
-						while (innerMap.containsKey(nodes[nodes.length - 2])) {
-							System.out.println("hi");
-							innerMap = (HashMap<String, Object>) innerMap.get(nodes[nodes.length - 2]);
-
+							}
 						}
 
 						if (sheetList.contains(nodes[i]) && !checkVisit(nodes[i])) {
@@ -61,18 +71,26 @@ public class Test1 {
 							visited.add(nodes[i]);
 						} else {
 							if (!sheetList.contains(nodes[i]))
-								innerMap.put(nodes[i], "" + 1);
+								innerMap.put(nodes[i], "" + values[1]);
 						}
-						System.out.println(baseMap.values());
+						// System.out.println(baseMap.values());
 					}
 
 				}
 			}
+			System.out.println(baseMap.values());
 
 			/*
 			 * for(Object set:baseMap.values()) { HashMap<String, Object>
 			 * hm=(HashMap<String, Object>) set; System.out.println(hm.keySet()); }
 			 */
+		 
+			 
+			 HashMap<String,Object> hm=(HashMap<String, Object>) baseMap.get("companies");
+			 HashMap<String,Object> hm1=(HashMap<String, Object>) hm.get("company");
+			 System.out.println(hm1.keySet());
+			// System.out.println(hm2.keySet());
+		 
 		} catch (
 
 		FileNotFoundException e) {
