@@ -9,11 +9,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -28,7 +32,7 @@ public class Test1 {
 	static HashMap<String, Object> baseMap = new HashMap<String, Object>();
 	static HashMap<String, List<Object[]>> map = new HashMap<String, List<Object[]>>();
 
-	public static void main(String[] args) throws ParserConfigurationException {
+	public static void main(String[] args) throws ParserConfigurationException, TransformerException {
 		FileInputStream inputStream;
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -78,25 +82,49 @@ public class Test1 {
 
 				}
 			}
-			System.out.println(baseMap.values());
+			Element rootElement = doc.createElement("Awes");
+			doc.appendChild(rootElement);
+			// System.out.println(baseMap.values());
+			buildTags(doc, baseMap, rootElement);
 
-			/*
-			 * for(Object set:baseMap.values()) { HashMap<String, Object>
-			 * hm=(HashMap<String, Object>) set; System.out.println(hm.keySet()); }
-			 */
-		 
-			 
-			 HashMap<String,Object> hm=(HashMap<String, Object>) baseMap.get("companies");
-			 HashMap<String,Object> hm1=(HashMap<String, Object>) hm.get("company");
-			 System.out.println(hm1.keySet());
-			// System.out.println(hm2.keySet());
-		 
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			DOMSource source = new DOMSource(doc);
+			StreamResult console = new StreamResult(System.out);
+			transformer.transform(source, console);
+
 		} catch (
 
 		FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+
+	}
+
+	private static void buildTags(Document doc, HashMap<String, Object> baseMap1, Element rootElement) {
+
+		for (Entry<String, Object> entry : baseMap1.entrySet()) {
+			String key = entry.getKey();
+
+			Object value = entry.getValue();
+			String str = "" + value.getClass();
+			String ty[] = str.split("\\.");
+			System.out.println(key + ":" + value);
+
+			if (ty[ty.length - 1].contentEquals("HashMap")) {
+				Element baseElement = doc.createElement(key);
+				rootElement.appendChild(baseElement);
+				buildTags(doc, (HashMap<String, Object>) value, baseElement);
+			} else {
+				Element element = doc.createElement(key);
+				element.setTextContent((String) value);
+				rootElement.appendChild(element);
+
+			}
+
 		}
 
 	}
